@@ -350,26 +350,77 @@ def fetch_market_data(tickers, start_date, end_date):
     try:
         data = yf.download(tickers, start=start_date, end=end_date, progress=False)
         
+        if data.empty:
+            st.error("No data received from Yahoo Finance")
+            return None, None
+        
+        # Handle single ticker vs multiple tickers
         if len(tickers) == 1:
-            prices = data['Adj Close'].to_frame()
-            prices.columns = tickers
+            # Single ticker - data structure is different
+            if 'Close' in data.columns:
+                prices = data['Close'].to_frame()
+                prices.columns = tickers
+            else:
+                st.error("'Close' column not found in data")
+                return None, None
         else:
-            prices = data['Adj Close']
+            # Multiple tickers
+            if 'Close' in data.columns:
+                prices = data['Close']
+            elif isinstance(data.columns, pd.MultiIndex):
+                # Sometimes data comes with MultiIndex columns
+                prices = data['Close']
+            else:
+                st.error("Unable to extract 'Close' prices from data")
+                return None, None
         
         # Drop any tickers with insufficient data
         prices = prices.dropna(axis=1, how='all')
         
         if prices.empty:
+            st.error("No valid price data after cleaning")
             return None, None
         
         # Calculate returns
         returns = prices.pct_change().dropna()
         
+        # Additional validation
+        if returns.empty:
+            st.error("Unable to calculate returns from price data")
+            return None, None
+        
         return prices, returns
     
     except Exception as e:
-        st.error(f"Error fetching data: {e}")
+        st.warning(f"Primary fetch failed: {str(e)}")
+        st.info("🔄 Trying alternative method (individual ticker fetch)...")
+        return fetch_market_data_alternative(tickers, start_date, end_date)
+
+
+@st.cache_data(ttl=3600)
+def fetch_market_data_alternative(tickers, start_date, end_date):
+    """Alternative: Fetch tickers one by one"""
+    all_prices = []
+    valid_tickers = []
+    
+    for ticker in tickers:
+        try:
+            data = yf.download(ticker, start=start_date, end=end_date, progress=False)
+            if not data.empty and 'Close' in data.columns:
+                prices_series = data['Close']
+                prices_series.name = ticker
+                all_prices.append(prices_series)
+                valid_tickers.append(ticker)
+        except:
+            continue
+    
+    if not all_prices:
         return None, None
+    
+    prices_df = pd.concat(all_prices, axis=1)
+    returns_df = prices_df.pct_change().dropna()
+    
+    return prices_df, returns_df
 
 
 def get_asset_name(ticker):
