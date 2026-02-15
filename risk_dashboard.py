@@ -512,7 +512,37 @@ if portfolio_mode == "Preset Portfolio":
         "Choose Preset",
         list(PRESET_PORTFOLIOS.keys())
     )
-    portfolio_dict = PRESET_PORTFOLIOS[selected_preset]
+    portfolio_dict = PRESET_PORTFOLIOS[selected_preset].copy()
+    
+    # Option to modify preset weights
+    modify_weights = st.sidebar.checkbox("Customize Weights", value=False)
+    
+    if modify_weights:
+        st.sidebar.markdown("**Adjust Weights (must sum to 100%):**")
+        new_weights = {}
+        
+        for ticker in portfolio_dict.keys():
+            weight_pct = st.sidebar.number_input(
+                f"{get_asset_name(ticker)}",
+                min_value=0.0,
+                max_value=100.0,
+                value=portfolio_dict[ticker] * 100,
+                step=1.0,
+                key=f"weight_{ticker}"
+            )
+            new_weights[ticker] = weight_pct / 100
+        
+        # Check if weights sum to 100%
+        total_weight = sum(new_weights.values())
+        if abs(total_weight - 1.0) > 0.01:
+            st.sidebar.warning(f"⚠️ Weights sum to {total_weight*100:.1f}%. Must equal 100%!")
+            # Auto-normalize
+            if st.sidebar.button("Auto-Normalize Weights"):
+                new_weights = {k: v/total_weight for k, v in new_weights.items()}
+                st.sidebar.success("✅ Weights normalized!")
+        
+        portfolio_dict = new_weights
+        
 else:
     # Custom selection
     st.sidebar.markdown("**Select Assets:**")
@@ -532,13 +562,65 @@ else:
         max_selections=15
     )
     
-    if selected_tickers:
-        # Equal weights for custom selection
-        equal_weight = 1.0 / len(selected_tickers)
-        portfolio_dict = {ticker: equal_weight for ticker in selected_tickers}
-    else:
+    if not selected_tickers:
         st.sidebar.warning("Please select at least one asset")
         st.stop()
+    
+    # Weight allocation method
+    weight_method = st.sidebar.radio(
+        "Weight Allocation Method",
+        ["Equal Weight", "Custom Weights", "Market Cap Weighted"],
+        help="Choose how to allocate portfolio weights"
+    )
+    
+    if weight_method == "Equal Weight":
+        equal_weight = 1.0 / len(selected_tickers)
+        portfolio_dict = {ticker: equal_weight for ticker in selected_tickers}
+        
+    elif weight_method == "Custom Weights":
+        st.sidebar.markdown("**Set Custom Weights (must sum to 100%):**")
+        portfolio_dict = {}
+        
+        for ticker in selected_tickers:
+            weight_pct = st.sidebar.number_input(
+                f"{get_asset_name(ticker)}",
+                min_value=0.0,
+                max_value=100.0,
+                value=100.0 / len(selected_tickers),
+                step=1.0,
+                key=f"custom_weight_{ticker}"
+            )
+            portfolio_dict[ticker] = weight_pct / 100
+        
+        # Validate weights
+        total_weight = sum(portfolio_dict.values())
+        if abs(total_weight - 1.0) > 0.01:
+            st.sidebar.warning(f"⚠️ Weights sum to {total_weight*100:.1f}%. Must equal 100%!")
+            if st.sidebar.button("Auto-Normalize"):
+                portfolio_dict = {k: v/total_weight for k, v in portfolio_dict.items()}
+                st.sidebar.success("✅ Normalized!")
+        else:
+            st.sidebar.success(f"✅ Weights sum to {total_weight*100:.0f}%")
+            
+    else:  # Market Cap Weighted
+        st.sidebar.info("💡 Market cap weights are approximated for demo purposes")
+        # Simplified market cap weights (you can enhance this with real market cap data)
+        market_cap_weights = {
+            # Indian stocks - approximate market cap weights
+            'RELIANCE.NS': 0.15, 'TCS.NS': 0.12, 'HDFCBANK.NS': 0.12,
+            'INFY.NS': 0.08, 'ICICIBANK.NS': 0.08, 'BHARTIARTL.NS': 0.07,
+            'ITC.NS': 0.06, 'KOTAKBANK.NS': 0.06,
+            # US stocks
+            'AAPL': 0.15, 'MSFT': 0.14, 'GOOGL': 0.10, 'AMZN': 0.09,
+            'NVDA': 0.08, 'JPM': 0.05, 'V': 0.04,
+            # Commodities & Indices
+            'GC=F': 0.03, '^NSEI': 0.08, '^GSPC': 0.08,
+        }
+        
+        # Get weights for selected tickers
+        raw_weights = {t: market_cap_weights.get(t, 1.0) for t in selected_tickers}
+        total = sum(raw_weights.values())
+        portfolio_dict = {t: w/total for t, w in raw_weights.items()}
 
 # Portfolio Value
 st.sidebar.markdown(f"<p style='color:{COLORS['accent_gold']}; font-weight:700;'>💰 Portfolio Settings</p>", unsafe_allow_html=True)
@@ -616,6 +698,30 @@ portfolio_returns, metrics = calculate_portfolio_metrics(returns_df, weights)
 var_pct, es_pct = calculate_var_es(portfolio_returns, confidence_level, var_method)
 var_amount = abs(var_pct) * portfolio_value
 es_amount = abs(es_pct) * portfolio_value
+
+# Display current portfolio allocation
+with st.expander("📊 Current Portfolio Allocation", expanded=False):
+    st.markdown("### Portfolio Composition")
+    
+    allocation_data = []
+    for ticker in valid_tickers:
+        weight = weights[list(valid_tickers).index(ticker)]
+        allocation_data.append({
+            'Asset': get_asset_name(ticker),
+            'Ticker': ticker,
+            'Weight (%)': f'{weight*100:.2f}%',
+            'Value (₹)': f'₹{weight * portfolio_value:,.0f}'
+        })
+    
+    allocation_df = pd.DataFrame(allocation_data)
+    st.dataframe(allocation_df, use_container_width=True, hide_index=True)
+    
+    # Validation
+    total_weight_pct = sum(weights) * 100
+    if abs(total_weight_pct - 100) < 0.1:
+        st.success(f"✅ Portfolio weights sum to {total_weight_pct:.1f}%")
+    else:
+        st.warning(f"⚠️ Portfolio weights sum to {total_weight_pct:.1f}%")
 
 # ============================================================================
 # MAIN DASHBOARD - TABS
