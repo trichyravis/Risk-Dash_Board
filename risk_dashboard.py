@@ -1470,8 +1470,8 @@ with tab2:
     st.pyplot(fig)
     plt.close()
 
-# ========== TAB 2: PORTFOLIO ANALYTICS ==========
-with tab8:
+# ========== TAB 3: PORTFOLIO ANALYTICS ==========
+with tab3:
     section_title("📊 Individual Asset Performance (Real Data)")
     
     asset_metrics = []
@@ -1612,8 +1612,8 @@ with tab8:
         else:
             st.info("Asset class distribution not available for current selection")
 
-# ========== TAB 3: PORTFOLIO ANALYTICS ==========
-with tab3:
+# ========== TAB 4: STRESS TESTING ==========
+with tab4:
     section_title("🔥 Stress Test Scenarios")
     
     st.markdown(f"""
@@ -1668,8 +1668,8 @@ with tab3:
     st.pyplot(fig)
     plt.close()
 
-# ========== TAB 4: STRESS TESTING ==========
-with tab4:
+# ========== TAB 5: CORRELATION ANALYSIS ==========
+with tab5:
     section_title("🔗 Asset Correlation Matrix (Real Data)")
     
     st.markdown(f"""
@@ -1712,8 +1712,8 @@ with tab4:
     with col3:
         metric_card("Min Correlation", f"{np.min(corr_values):.3f}", "Lowest co-movement")
 
-# ========== TAB 5: CORRELATION ANALYSIS ==========
-with tab5:
+# ========== TAB 6: PORTFOLIO OPTIMIZATION ==========
+with tab6:
     section_title("📈 Portfolio Optimization - Maximum Sharpe Ratio")
     
     st.markdown(f"""
