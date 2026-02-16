@@ -1364,7 +1364,7 @@ with tab1:
 
 
 # ========== TAB 2: RISK OVERVIEW ==========
-with tab8:
+with tab2:
     section_title("🎯 Key Risk Metrics")
     st.caption(f"Portfolio: ₹{portfolio_value:,.0f} | Confidence: {confidence_level*100:.0f}% | Method: {var_method.title()} | Data: {data_start} to {data_end}")
     
@@ -1612,8 +1612,8 @@ with tab8:
         else:
             st.info("Asset class distribution not available for current selection")
 
-# ========== TAB 3: STRESS TESTING ==========
-with tab8:
+# ========== TAB 3: PORTFOLIO ANALYTICS ==========
+with tab3:
     section_title("🔥 Stress Test Scenarios")
     
     st.markdown(f"""
@@ -1668,8 +1668,8 @@ with tab8:
     st.pyplot(fig)
     plt.close()
 
-# ========== TAB 4: CORRELATION ==========
-with tab8:
+# ========== TAB 4: STRESS TESTING ==========
+with tab4:
     section_title("🔗 Asset Correlation Matrix (Real Data)")
     
     st.markdown(f"""
@@ -1712,8 +1712,8 @@ with tab8:
     with col3:
         metric_card("Min Correlation", f"{np.min(corr_values):.3f}", "Lowest co-movement")
 
-# ========== TAB 5: PORTFOLIO OPTIMIZATION ==========
-with tab8:
+# ========== TAB 5: CORRELATION ANALYSIS ==========
+with tab5:
     section_title("📈 Portfolio Optimization - Maximum Sharpe Ratio")
     
     st.markdown(f"""
@@ -2014,8 +2014,8 @@ with tab8:
     """, unsafe_allow_html=True)
 
 
-# ========== TAB 6: PERFORMANCE METRICS ==========
-with tab8:
+# ========== TAB 7: PERFORMANCE METRICS ==========
+with tab7:
     section_title("📉 Advanced Performance Metrics")
     
     st.markdown(f"""
@@ -2303,7 +2303,7 @@ with tab8:
         """, unsafe_allow_html=True)
 
 
-# ========== TAB 7: ASSET DETAILS ==========
+# ========== TAB 8: ASSET DETAILS ==========
 with tab8:
     section_title("📚 Portfolio Holdings Details")
     
