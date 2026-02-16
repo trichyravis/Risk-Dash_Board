@@ -914,32 +914,39 @@ with tab1:
     
     col1, col2 = st.columns(2)
     with col1:
-        info_box(f"""
-            <strong>Value at Risk - {confidence_level*100:.0f}% Confidence</strong>
-            <p style="margin-top:0.5rem;">
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>VaR - Real Market Data</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>Value at Risk - {confidence_level*100:.0f}% Confidence</strong><br/>
             Based on <strong>real market data</strong>, with {confidence_level*100:.0f}% confidence, 
             your portfolio losses will not exceed 
             <strong style="color:{COLORS['accent_gold']};">₹{var_amount:,.0f}</strong> 
             over the next {time_horizon} day(s).
             </p>
-            <p style="margin-top:0.5rem; font-size:0.85rem;">
+            <p style="margin-top:0.5rem; font-size:0.85rem; color:{COLORS['text_secondary']};">
             This is calculated from actual historical volatility and correlations 
             in the {lookback_period.lower()} period.
             </p>
-        """, title="VaR - Real Market Data")
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        info_box(f"""
-            <strong>Expected Shortfall (Tail Risk)</strong>
-            <p style="margin-top:0.5rem;">
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>ES - Tail Risk Measure</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>Expected Shortfall (Tail Risk)</strong><br/>
             If losses exceed VaR, the average loss based on historical data is 
             <strong style="color:{COLORS['danger']};">₹{es_amount:,.0f}</strong>.
             </p>
-            <p style="margin-top:0.5rem; font-size:0.85rem;">
+            <p style="margin-top:0.5rem; font-size:0.85rem; color:{COLORS['text_secondary']};">
             ES captures the severity of tail events observed in actual market movements 
             and is the preferred risk measure under Basel III.
             </p>
-        """, title="ES - Tail Risk Measure")
+        </div>
+        """, unsafe_allow_html=True)
+    
     
     st.markdown("---")
     section_title("📈 Portfolio Return Distribution (Real Data)")
