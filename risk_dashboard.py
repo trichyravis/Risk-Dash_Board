@@ -257,15 +257,18 @@ def apply_styles():
             color: {COLORS['text_dark']} !important;
         }}
 
-        /* Expander styling for Asset Details */
+        /* Expander styling for Asset Details - CRITICAL FOR VISIBILITY */
         .streamlit-expanderHeader {{
             background: {COLORS['card_bg']} !important;
-            border: 1px solid rgba(255,215,0,0.3) !important;
+            border: 1px solid {COLORS['accent_gold']} !important;
             border-radius: 8px !important;
-            color: {COLORS['accent_gold']} !important;
         }}
         
-        .streamlit-expanderHeader p {{
+        .streamlit-expanderHeader p,
+        .streamlit-expanderHeader span,
+        .streamlit-expanderHeader div,
+        .streamlit-expanderHeader label,
+        [data-testid="stExpanderToggleIcon"] {{
             color: {COLORS['accent_gold']} !important;
             font-weight: 600 !important;
             font-size: 1rem !important;
@@ -273,6 +276,16 @@ def apply_styles():
         
         .streamlit-expanderHeader svg {{
             fill: {COLORS['accent_gold']} !important;
+            stroke: {COLORS['accent_gold']} !important;
+        }}
+        
+        /* Force all expander content to be visible */
+        details summary {{
+            color: {COLORS['accent_gold']} !important;
+        }}
+        
+        details summary * {{
+            color: {COLORS['accent_gold']} !important;
         }}
         
         .streamlit-expanderContent {{
