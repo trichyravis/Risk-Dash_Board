@@ -922,7 +922,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2 = st.tabs([
+tab1, tab2, tab3 = st.tabs([
+    "📖 User Guide",
     "🎯 Risk Overview",
     "📊 Portfolio Analytics"
 ])
@@ -966,7 +967,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-tab3, tab4, tab5, tab6, tab7 = st.tabs([
+tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "🔥 Stress Testing",
     "🔗 Correlation Analysis",
     "📈 Portfolio Optimization",
@@ -974,8 +975,396 @@ tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📚 Asset Details"
 ])
 
-# ========== TAB 1: RISK OVERVIEW ==========
+# ========== TAB 1: USER GUIDE ==========
 with tab1:
+    section_title("📖 Welcome to the Portfolio Risk Dashboard")
+    
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>🏔️ The Mountain Path - Risk Analytics Platform</h4>
+        <p style='margin-top:0.5rem;'>
+        This comprehensive dashboard provides institutional-grade risk analytics for your investment portfolio.
+        Built with real-time market data from Yahoo Finance, it combines Modern Portfolio Theory, 
+        Value at Risk (VaR), and advanced performance metrics to help you make informed investment decisions.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    section_title("🗺️ Dashboard Navigation")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>📊 Row 1: Core Risk Analysis</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>🎯 Risk Overview</strong><br/>
+            View VaR, Expected Shortfall, Sharpe Ratio, and key risk metrics. 
+            Includes return distributions and historical performance charts.
+            </p>
+            <p style='margin-top:0.5rem;'>
+            <strong>📊 Portfolio Analytics</strong><br/>
+            Analyze individual asset performance, portfolio composition, 
+            and normalized price comparisons across holdings.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>🔬 Row 2: Advanced Analytics</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>🔥 Stress Testing:</strong> Scenario analysis<br/>
+            <strong>🔗 Correlation:</strong> Asset relationships<br/>
+            <strong>📈 Optimization:</strong> Max Sharpe portfolio<br/>
+            <strong>📉 Performance:</strong> Drawdown & ratios<br/>
+            <strong>📚 Asset Details:</strong> Individual holdings
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    section_title("⚙️ Getting Started - Sidebar Controls")
+    
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>1️⃣ Portfolio Selection</h4>
+        <p style='margin-top:0.5rem;'>
+        <strong>Preset Portfolio:</strong> Choose from 3 pre-configured portfolios<br/>
+        • Nifty 50 Blue Chips - Top Indian stocks<br/>
+        • Global Tech Focused - Tech companies (India + US)<br/>
+        • Balanced Global - Diversified across asset classes
+        </p>
+        <p style='margin-top:0.5rem;'>
+        <strong>Custom Selection:</strong> Build your own portfolio<br/>
+        • Select from 15+ Nifty 50 stocks<br/>
+        • Add US tech giants (Apple, Microsoft, Google, etc.)<br/>
+        • Include commodities (Gold, Silver)<br/>
+        • Add market indices (Nifty 50, S&P 500)
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>2️⃣ Weight Allocation</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>Three Methods Available:</strong>
+            </p>
+            <p style='margin-top:0.3rem;'>
+            • <strong>Equal Weight:</strong> Distribute equally across all assets<br/>
+            • <strong>Custom Weights:</strong> Set % for each asset (must sum to 100%)<br/>
+            • <strong>Market Cap Weighted:</strong> Based on company size
+            </p>
+            <p style='margin-top:0.5rem; font-size:0.85rem; color:{COLORS['text_secondary']};">
+            💡 <strong>Tip:</strong> Use the "Auto-Normalize" button if weights don't sum to 100%
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>3️⃣ Portfolio Settings</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>Portfolio Value:</strong> ₹100,000 to ₹100 crore<br/>
+            Set your total investment amount
+            </p>
+            <p style='margin-top:0.5rem;'>
+            <strong>Confidence Level:</strong> 90% to 99%<br/>
+            Default: 95% (industry standard)
+            </p>
+            <p style='margin-top:0.5rem;'>
+            <strong>VaR Method:</strong><br/>
+            • Historical: Based on actual returns<br/>
+            • Parametric: Assumes normal distribution<br/>
+            • Monte Carlo: Simulation-based
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    section_title("📊 Key Features Explained")
+    
+    # Feature 1
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>📈 Real-Time Market Data</h4>
+        <p style='margin-top:0.5rem;'>
+        <strong>Data Source:</strong> Yahoo Finance API<br/>
+        <strong>Update Frequency:</strong> Daily closing prices<br/>
+        <strong>Historical Period:</strong> 3 months to 3 years (configurable)<br/>
+        <strong>Data Quality:</strong> Automatically handles missing data and adjusts weights
+        </p>
+        <p style='margin-top:0.5rem; font-size:0.85rem; color:{COLORS['text_secondary']};">
+        💡 <strong>Note:</strong> Data is cached for 1 hour to improve performance. 
+        Refresh the page to fetch latest data.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Feature 2
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>🎯 Value at Risk (VaR)</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>What it tells you:</strong><br/>
+            "With 95% confidence, your portfolio losses will not exceed ₹X over the next day"
+            </p>
+            <p style='margin-top:0.5rem;'>
+            <strong>Use Cases:</strong><br/>
+            • Risk budgeting<br/>
+            • Regulatory compliance (Basel III)<br/>
+            • Position sizing<br/>
+            • Stress testing
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>📉 Expected Shortfall (ES)</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>What it tells you:</strong><br/>
+            "If losses exceed VaR, the average loss will be ₹Y"
+            </p>
+            <p style='margin-top:0.5rem;'>
+            <strong>Why it matters:</strong><br/>
+            • Captures tail risk (extreme events)<br/>
+            • Preferred over VaR by regulators<br/>
+            • Shows severity of worst-case scenarios
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Feature 3
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>📈 Portfolio Optimization (Max Sharpe Ratio)</h4>
+        <p style='margin-top:0.5rem;'>
+        <strong>What it does:</strong> Finds the optimal portfolio allocation that maximizes 
+        risk-adjusted returns (Sharpe Ratio)
+        </p>
+        <p style='margin-top:0.5rem;'>
+        <strong>Key Components:</strong><br/>
+        • <strong>Efficient Frontier:</strong> Shows all optimal portfolios<br/>
+        • <strong>Max Sharpe Portfolio:</strong> Best risk-adjusted returns (⭐ gold star)<br/>
+        • <strong>Min Variance Portfolio:</strong> Lowest risk option (♦ green diamond)<br/>
+        • <strong>Weight Recommendations:</strong> Which assets to increase/decrease
+        </p>
+        <p style='margin-top:0.5rem;'>
+        <strong>Risk-Free Rate:</strong> Adjustable from 0-20% (default: 5%)<br/>
+        <span style='font-size:0.85rem; color:{COLORS['text_secondary']}'>
+        Common values: India 10Y G-Sec ~7% | US 10Y Treasury ~4%
+        </span>
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    section_title("🔥 Advanced Features")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>🔥 Stress Testing</h4>
+            <p style='margin-top:0.5rem;'>
+            Test portfolio resilience under 6 scenarios:
+            </p>
+            <p style='margin-top:0.3rem;'>
+            • Market Crash (-20%)<br/>
+            • Moderate Correction (-10%)<br/>
+            • Volatility Spike<br/>
+            • Asian Crisis<br/>
+            • Global Recession (-25%)<br/>
+            • Black Swan Event (-30%)
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>🔗 Correlation Analysis</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>Correlation Matrix:</strong> Heatmap showing relationships between assets
+            </p>
+            <p style='margin-top:0.3rem;'>
+            • +1.0 = Perfect positive correlation<br/>
+            • 0.0 = No correlation<br/>
+            • -1.0 = Perfect negative correlation
+            </p>
+            <p style='margin-top:0.5rem; font-size:0.85rem; color:{COLORS['text_secondary']}'>
+            💡 Lower correlations = Better diversification
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>📉 Performance Metrics</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>Max Drawdown:</strong> Worst peak-to-trough decline<br/>
+            Shows: Peak date, trough date, duration, recovery status
+            </p>
+            <p style='margin-top:0.5rem;'>
+            <strong>Calmar Ratio:</strong> Return / Max Drawdown<br/>
+            Measures return per unit of downside risk
+            </p>
+            <p style='margin-top:0.5rem;'>
+            <strong>Information Ratio:</strong> Excess Return / Tracking Error<br/>
+            Measures active management skill vs benchmark
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>📚 Asset Details</h4>
+            <p style='margin-top:0.5rem;'>
+            Drill down into individual holdings:
+            </p>
+            <p style='margin-top:0.3rem;'>
+            • Asset allocation & weight<br/>
+            • Annual return & volatility<br/>
+            • Sharpe ratio & VaR (95%)<br/>
+            • Historical price chart
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    section_title("💡 Pro Tips & Best Practices")
+    
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>✅ Recommended Workflow</h4>
+        <p style='margin-top:0.5rem;'>
+        <strong>1. Start with Risk Overview</strong><br/>
+        Understand your current portfolio's VaR, ES, and Sharpe Ratio
+        </p>
+        <p style='margin-top:0.5rem;'>
+        <strong>2. Check Correlation Analysis</strong><br/>
+        Ensure adequate diversification (correlations < 0.7)
+        </p>
+        <p style='margin-top:0.5rem;'>
+        <strong>3. Run Portfolio Optimization</strong><br/>
+        See if rebalancing can improve risk-adjusted returns
+        </p>
+        <p style='margin-top:0.5rem;'>
+        <strong>4. Perform Stress Testing</strong><br/>
+        Verify portfolio can withstand market shocks
+        </p>
+        <p style='margin-top:0.5rem;'>
+        <strong>5. Review Performance Metrics</strong><br/>
+        Analyze drawdowns and recovery patterns
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="info-box" style="border-color:{COLORS['success']};">
+            <h4 style='color:{COLORS['success']}; margin-top:0;'>✅ Do's</h4>
+            <p style='margin-top:0.5rem;'>
+            ✓ Start with equal weights, then optimize<br/>
+            ✓ Use 1-2 year lookback for stable estimates<br/>
+            ✓ Check correlations before adding assets<br/>
+            ✓ Compare multiple VaR methods<br/>
+            ✓ Review max drawdown recovery time<br/>
+            ✓ Rebalance when weights drift >5%
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="info-box" style="border-color:{COLORS['danger']};">
+            <h4 style='color:{COLORS['danger']}; margin-top:0;'>❌ Don'ts</h4>
+            <p style='margin-top:0.5rem;'>
+            ✗ Don't use <3 months data (unstable)<br/>
+            ✗ Don't ignore high correlations (>0.8)<br/>
+            ✗ Don't rely solely on VaR (use ES too)<br/>
+            ✗ Don't optimize on short periods<br/>
+            ✗ Don't ignore recovery duration<br/>
+            ✗ Don't over-concentrate (max 20% per asset)
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    section_title("📚 Additional Resources")
+    
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>🎓 Educational Materials</h4>
+        <p style='margin-top:0.5rem;'>
+        This dashboard is built for educational and professional use. For deeper understanding:
+        </p>
+        <p style='margin-top:0.5rem;'>
+        <strong>Risk Management:</strong><br/>
+        • Basel III framework for VaR/ES<br/>
+        • Jorion's "Value at Risk" (Industry Standard)<br/>
+        • Hull's "Risk Management and Financial Institutions"
+        </p>
+        <p style='margin-top:0.5rem;'>
+        <strong>Portfolio Theory:</strong><br/>
+        • Markowitz Modern Portfolio Theory<br/>
+        • Sharpe's Capital Asset Pricing Model<br/>
+        • Fama-French Factor Models
+        </p>
+        <p style='margin-top:0.5rem;'>
+        <strong>Mountain Path Courses:</strong><br/>
+        • Financial Risk Management (FRM)<br/>
+        • Fixed Income Securities & Analysis<br/>
+        • Financial Derivatives<br/>
+        • Portfolio Management
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Footer for user guide
+    st.markdown(f"""
+    <div style="text-align:center; padding:1.5rem; background:rgba(0,51,102,0.3); 
+                border-radius:8px; border:1px solid {COLORS['accent_gold']};">
+        <h3 style="color:{COLORS['accent_gold']}; margin:0;">Ready to Analyze Your Portfolio?</h3>
+        <p style="color:{COLORS['text_primary']}; margin:1rem 0;">
+            Configure your portfolio in the sidebar, then explore the tabs above ⬆️
+        </p>
+        <p style="color:{COLORS['text_secondary']}; font-size:0.85rem; margin:0;">
+            Questions? Contact: {BRANDING['instructor']}<br/>
+            {BRANDING['credentials']}
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ========== TAB 2: RISK OVERVIEW ==========
+with tab8:
     section_title("🎯 Key Risk Metrics")
     st.caption(f"Portfolio: ₹{portfolio_value:,.0f} | Confidence: {confidence_level*100:.0f}% | Method: {var_method.title()} | Data: {data_start} to {data_end}")
     
@@ -1082,7 +1471,7 @@ with tab1:
     plt.close()
 
 # ========== TAB 2: PORTFOLIO ANALYTICS ==========
-with tab2:
+with tab8:
     section_title("📊 Individual Asset Performance (Real Data)")
     
     asset_metrics = []
@@ -1224,7 +1613,7 @@ with tab2:
             st.info("Asset class distribution not available for current selection")
 
 # ========== TAB 3: STRESS TESTING ==========
-with tab3:
+with tab8:
     section_title("🔥 Stress Test Scenarios")
     
     st.markdown(f"""
@@ -1280,7 +1669,7 @@ with tab3:
     plt.close()
 
 # ========== TAB 4: CORRELATION ==========
-with tab4:
+with tab8:
     section_title("🔗 Asset Correlation Matrix (Real Data)")
     
     st.markdown(f"""
@@ -1324,7 +1713,7 @@ with tab4:
         metric_card("Min Correlation", f"{np.min(corr_values):.3f}", "Lowest co-movement")
 
 # ========== TAB 5: PORTFOLIO OPTIMIZATION ==========
-with tab5:
+with tab8:
     section_title("📈 Portfolio Optimization - Maximum Sharpe Ratio")
     
     st.markdown(f"""
@@ -1626,7 +2015,7 @@ with tab5:
 
 
 # ========== TAB 6: PERFORMANCE METRICS ==========
-with tab6:
+with tab8:
     section_title("📉 Advanced Performance Metrics")
     
     st.markdown(f"""
@@ -1915,7 +2304,7 @@ with tab6:
 
 
 # ========== TAB 7: ASSET DETAILS ==========
-with tab7:
+with tab8:
     section_title("📚 Portfolio Holdings Details")
     
     # Summary info with better visibility
