@@ -836,16 +836,36 @@ if prices_df is None or returns_df is None or returns_df.empty:
 
 # Filter to only include tickers that have data
 valid_tickers = returns_df.columns.tolist()
-if len(valid_tickers) < len(tickers):
+
+# CRITICAL: Always update weights to match valid_tickers
+if len(valid_tickers) != len(tickers):
     missing = set(tickers) - set(valid_tickers)
-    st.warning(f"⚠️ Could not fetch data for: {', '.join(missing)}")
+    if missing:
+        st.warning(f"⚠️ Could not fetch data for: {', '.join(missing)}")
     
-    # Update weights for valid tickers only
-    valid_weights = []
-    for ticker in valid_tickers:
+# Rebuild weights array to match valid_tickers exactly
+valid_weights = []
+for ticker in valid_tickers:
+    if ticker in portfolio_dict:
         valid_weights.append(portfolio_dict[ticker])
-    weights = np.array(valid_weights)
-    weights = weights / weights.sum()  # Renormalize
+    else:
+        valid_weights.append(0)  # Should not happen, but safety
+
+weights = np.array(valid_weights)
+
+# Renormalize to ensure sum = 1
+if weights.sum() > 0:
+    weights = weights / weights.sum()
+else:
+    st.error("❌ No valid weights found")
+    st.stop()
+
+# Validation: Ensure weights length matches returns_df columns
+if len(weights) != len(returns_df.columns):
+    st.error(f"❌ Weights mismatch: {len(weights)} weights for {len(returns_df.columns)} assets")
+    st.error(f"Valid tickers: {valid_tickers}")
+    st.error(f"Weight length: {len(weights)}")
+    st.stop()
 
 # Data info
 data_start = returns_df.index[0].strftime('%Y-%m-%d')
