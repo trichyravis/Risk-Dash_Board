@@ -1712,8 +1712,10 @@ with tab6:
         
         recovery_status = "Recovered"
         recovery_days = 0
+        recovery_line = ""
         if dd_info['recovery_date']:
             recovery_days = (dd_info['recovery_date'] - dd_info['trough_date']).days
+            recovery_line = f"<strong>Recovery Duration:</strong> {recovery_days} days<br/>"
         else:
             recovery_status = "Not Yet Recovered"
         
@@ -1725,7 +1727,7 @@ with tab6:
             <strong>Trough Date:</strong> {dd_info['trough_date'].strftime('%Y-%m-%d') if dd_info['trough_date'] else 'N/A'}<br/>
             <strong>Drawdown Duration:</strong> {duration_days} days<br/>
             <strong>Recovery Status:</strong> {recovery_status}<br/>
-            {f"<strong>Recovery Duration:</strong> {recovery_days} days<br/>" if dd_info['recovery_date'] else ""}
+            {recovery_line}
             <strong>Total Loss:</strong> <span style="color:{COLORS['danger']};">{dd_info['max_drawdown']*100:.2f}%</span>
             </p>
         </div>
