@@ -1239,26 +1239,49 @@ with tab5:
     
     # Plot optimal portfolios
     ax.scatter(max_sharpe_std, max_sharpe_return, marker='*', color=COLORS['accent_gold'], 
-              s=500, edgecolors='black', linewidth=2, label='Max Sharpe Ratio', zorder=5)
+              s=500, edgecolors='white', linewidth=2.5, label='Max Sharpe Ratio', zorder=5)
     ax.scatter(min_var_std, min_var_return, marker='D', color=COLORS['success'], 
-              s=300, edgecolors='black', linewidth=2, label='Min Variance', zorder=5)
+              s=300, edgecolors='white', linewidth=2, label='Min Variance', zorder=5)
     ax.scatter(current_std, current_return, marker='o', color=COLORS['danger'], 
-              s=300, edgecolors='black', linewidth=2, label='Current Portfolio', zorder=5)
+              s=300, edgecolors='white', linewidth=2, label='Current Portfolio', zorder=5)
     
-    # Colorbar
+    # Colorbar with better visibility
     cbar = plt.colorbar(scatter, ax=ax)
-    cbar.set_label('Sharpe Ratio', rotation=270, labelpad=20, color=COLORS['text_primary'])
-    cbar.ax.tick_params(colors=COLORS['text_secondary'])
+    cbar.set_label('Sharpe Ratio', rotation=270, labelpad=20, 
+                   color='white', fontsize=11, weight='bold')
+    cbar.ax.tick_params(colors='white', labelsize=10)
+    cbar.outline.set_edgecolor('white')
+    cbar.outline.set_linewidth(1)
     
-    # Styling
-    ax.set_xlabel('Annualized Volatility (%)', fontsize=12, color=COLORS['text_secondary'])
-    ax.set_ylabel('Annualized Return (%)', fontsize=12, color=COLORS['text_secondary'])
-    ax.set_title('Efficient Frontier - Risk vs Return', fontsize=14, color=COLORS['text_primary'], pad=20)
-    ax.tick_params(colors=COLORS['text_secondary'])
-    ax.legend(loc='upper left', fontsize=10, facecolor=COLORS['card_bg'], edgecolor=COLORS['accent_gold'])
-    ax.grid(True, alpha=0.3)
+    # Styling with high contrast
+    ax.set_xlabel('Annualized Volatility (%)', fontsize=13, color='white', weight='bold')
+    ax.set_ylabel('Annualized Return (%)', fontsize=13, color='white', weight='bold')
+    ax.set_title('Efficient Frontier - Risk vs Return', fontsize=15, 
+                color='white', pad=20, weight='bold')
+    
+    # Tick labels in white
+    ax.tick_params(colors='white', labelsize=11)
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_color('white')
+        label.set_fontweight('bold')
+    
+    # Legend with better contrast
+    legend = ax.legend(loc='upper left', fontsize=11, 
+                      facecolor='#1a2332', edgecolor=COLORS['accent_gold'], 
+                      framealpha=0.95, labelcolor='white')
+    legend.get_frame().set_linewidth(2)
+    
+    # Grid
+    ax.grid(True, alpha=0.3, color='white', linestyle='--', linewidth=0.5)
+    
+    # Background
     ax.set_facecolor('#0f1824')
     fig.patch.set_facecolor('#0f1824')
+    
+    # Spines (axes borders)
+    for spine in ax.spines.values():
+        spine.set_edgecolor('white')
+        spine.set_linewidth(1.5)
     
     plt.tight_layout()
     st.pyplot(fig)
