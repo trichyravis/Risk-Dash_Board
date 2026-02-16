@@ -294,6 +294,31 @@ def apply_styles():
             border-top: none !important;
         }}
 
+        /* Sidebar button styling - CRITICAL FOR VISIBILITY */
+        .stButton > button {{
+            background: linear-gradient(135deg, {COLORS['medium_blue']}, {COLORS['dark_blue']}) !important;
+            color: {COLORS['accent_gold']} !important;
+            border: 2px solid {COLORS['accent_gold']} !important;
+            border-radius: 8px !important;
+            padding: 0.5rem 1rem !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            width: 100% !important;
+            transition: all 0.3s ease !important;
+        }}
+        
+        .stButton > button:hover {{
+            background: linear-gradient(135deg, {COLORS['accent_gold']}, #d4af37) !important;
+            color: {COLORS['dark_blue']} !important;
+            border-color: {COLORS['accent_gold']} !important;
+            box-shadow: 0 4px 12px rgba(255,215,0,0.4) !important;
+            transform: translateY(-2px) !important;
+        }}
+        
+        .stButton > button:active {{
+            transform: translateY(0) !important;
+        }}
+
         footer {{visibility: hidden;}}
     </style>
     """, unsafe_allow_html=True)
