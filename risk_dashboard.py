@@ -927,52 +927,36 @@ tab1, tab2 = st.tabs([
     "📊 Portfolio Analytics"
 ])
 
-# Prominent visual separator and scroll indicator
+# Visual separator between tab rows
+st.markdown("<br>", unsafe_allow_html=True)
 st.markdown(f"""
-<div style="text-align: center; margin: 2rem 0 1rem 0; position: relative;">
-    <div style="height: 2px; background: linear-gradient(90deg, transparent, {COLORS['accent_gold']}, transparent); 
-                margin: 1rem 0;"></div>
-    
-    <div style="display: inline-block; background: linear-gradient(135deg, {COLORS['dark_blue']}, {COLORS['medium_blue']}); 
-                border: 3px solid {COLORS['accent_gold']}; border-radius: 50%; 
-                width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;
-                box-shadow: 0 4px 15px rgba(255,215,0,0.3); cursor: pointer;
-                animation: bounce 2s infinite;">
-        <span style="font-size: 32px;">⬇️</span>
+<div style="text-align: center; padding: 2rem 0 1.5rem;">
+    <div style="font-size: 3rem; margin-bottom: 0.5rem; animation: pulse 2s ease-in-out infinite;">
+        ⬇️
     </div>
-    
-    <h3 style="color:{COLORS['accent_gold']}; margin: 1rem 0 0.3rem; font-family: 'Playfair Display', serif;
-               font-size: 1.3rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-        🔬 Advanced Analytics Below
+    <h3 style="color:{COLORS['accent_gold']}; margin: 0; font-family: 'Playfair Display', serif; font-size: 1.4rem;">
+        More Analytics Below
     </h3>
-    <p style="color:{COLORS['text_primary']}; font-size: 0.95rem; margin: 0;">
-        Scroll down for Stress Testing, Correlation, Optimization & Performance Metrics
+    <p style="color:{COLORS['text_primary']}; margin: 0.5rem 0 0; font-size: 1rem;">
+        📊 Stress Testing  •  🔗 Correlation  •  📈 Optimization  •  📉 Performance  •  📚 Details
     </p>
-    
-    <div style="height: 2px; background: linear-gradient(90deg, transparent, {COLORS['accent_gold']}, transparent); 
-                margin: 1rem 0;"></div>
 </div>
 
 <style>
-@keyframes bounce {{
-    0%, 20%, 50%, 80%, 100% {{
-        transform: translateY(0);
-    }}
-    40% {{
-        transform: translateY(-10px);
-    }}
-    60% {{
-        transform: translateY(-5px);
-    }}
+@keyframes pulse {{
+    0%, 100% {{ opacity: 1; transform: scale(1); }}
+    50% {{ opacity: 0.7; transform: scale(1.1); }}
 }}
 </style>
+
+<hr style="border: none; height: 2px; background: linear-gradient(90deg, transparent 0%, {COLORS['accent_gold']} 50%, transparent 100%); margin: 1rem 0 2rem;">
 """, unsafe_allow_html=True)
 
-# Row 2: Advanced Analytics
+# Row 2: Advanced Analytics header
 st.markdown(f"""
 <div style="background: linear-gradient(90deg, {COLORS['medium_blue']}, {COLORS['dark_blue']}); 
             border-left: 4px solid {COLORS['accent_gold']}; padding: 0.8rem 1.5rem; 
-            margin: 1rem 0 0.5rem 0; border-radius: 8px;">
+            margin: 0 0 0.5rem 0; border-radius: 8px;">
     <h3 style="color:{COLORS['accent_gold']}; margin:0; font-family: 'Playfair Display', serif;">
         🔬 Advanced Analytics & Optimization
     </h3>
