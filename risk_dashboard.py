@@ -828,12 +828,19 @@ with st.expander("📊 Current Portfolio Allocation", expanded=False):
         st.warning(f"⚠️ Portfolio weights sum to {total_weight_pct:.1f}%")
 
 # ============================================================================
-# MAIN DASHBOARD - TABS
+# MAIN DASHBOARD - TABS (Split into 2 rows)
 # ============================================================================
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+st.markdown(f'<div class="section-title">📊 Risk Analytics Dashboard</div>', unsafe_allow_html=True)
+
+# First row of tabs
+tab1, tab2, tab3 = st.tabs([
     "🎯 Risk Overview",
     "📊 Portfolio Analytics",
-    "🔥 Stress Testing",
+    "🔥 Stress Testing"
+])
+
+# Second row of tabs
+tab4, tab5, tab6 = st.tabs([
     "🔗 Correlation Analysis",
     "📈 Portfolio Optimization",
     "📚 Asset Details"
