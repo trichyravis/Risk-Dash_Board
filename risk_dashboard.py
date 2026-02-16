@@ -503,6 +503,63 @@ def calculate_portfolio_metrics(returns_df, weights):
     return portfolio_returns, metrics
 
 
+def calculate_max_drawdown_detailed(returns):
+    """Calculate detailed maximum drawdown metrics"""
+    cumulative = (1 + returns).cumprod()
+    running_max = cumulative.cummax()
+    drawdown = (cumulative - running_max) / running_max
+    
+    max_dd = drawdown.min()
+    max_dd_idx = drawdown.idxmin()
+    
+    # Find peak before max drawdown
+    peak_idx = cumulative[:max_dd_idx].idxmax()
+    
+    # Find recovery point (if any)
+    recovery_idx = None
+    if max_dd_idx < cumulative.index[-1]:
+        recovery_data = cumulative[max_dd_idx:]
+        peak_value = cumulative[peak_idx]
+        recovered = recovery_data[recovery_data >= peak_value]
+        if len(recovered) > 0:
+            recovery_idx = recovered.index[0]
+    
+    return {
+        'max_drawdown': max_dd,
+        'peak_date': peak_idx,
+        'trough_date': max_dd_idx,
+        'recovery_date': recovery_idx,
+        'drawdown_series': drawdown
+    }
+
+
+def calculate_calmar_ratio(returns, risk_free_rate=0.05):
+    """Calculate Calmar Ratio (Return / Max Drawdown)"""
+    annual_return = returns.mean() * 252
+    dd_info = calculate_max_drawdown_detailed(returns)
+    max_dd = abs(dd_info['max_drawdown'])
+    
+    if max_dd == 0:
+        return 0
+    
+    calmar = (annual_return - risk_free_rate) / max_dd
+    return calmar
+
+
+def calculate_information_ratio(portfolio_returns, benchmark_returns):
+    """Calculate Information Ratio (Tracking Error adjusted excess return)"""
+    excess_returns = portfolio_returns - benchmark_returns
+    tracking_error = excess_returns.std() * np.sqrt(252)
+    
+    if tracking_error == 0:
+        return 0
+    
+    annual_excess = excess_returns.mean() * 252
+    info_ratio = annual_excess / tracking_error
+    
+    return info_ratio, tracking_error, annual_excess
+
+
 def portfolio_performance(weights, mean_returns, cov_matrix, risk_free_rate=0.05):
     """Calculate portfolio performance metrics"""
     returns = np.sum(mean_returns * weights) * 252
@@ -878,10 +935,11 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-tab3, tab4, tab5, tab6 = st.tabs([
+tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "🔥 Stress Testing",
     "🔗 Correlation Analysis",
     "📈 Portfolio Optimization",
+    "📉 Performance Metrics",
     "📚 Asset Details"
 ])
 
@@ -1536,8 +1594,295 @@ with tab5:
     """, unsafe_allow_html=True)
 
 
-# ========== TAB 6: ASSET DETAILS ==========
+# ========== TAB 6: PERFORMANCE METRICS ==========
 with tab6:
+    section_title("📉 Advanced Performance Metrics")
+    
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>Risk-Adjusted Performance Analysis</h4>
+        <p style='margin-top:0.5rem;'>
+        Beyond Sharpe Ratio: Comprehensive metrics that measure portfolio performance 
+        relative to downside risk, drawdowns, and benchmark tracking.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Calculate detailed drawdown metrics
+    dd_info = calculate_max_drawdown_detailed(portfolio_returns)
+    
+    # Calculate Calmar Ratio
+    calmar = calculate_calmar_ratio(portfolio_returns, risk_free_rate=0.05)
+    
+    # Calculate Information Ratio (using equal-weighted portfolio as benchmark)
+    benchmark_weights = np.ones(len(valid_tickers)) / len(valid_tickers)
+    benchmark_returns = (returns_df * benchmark_weights).sum(axis=1)
+    info_ratio, tracking_error, annual_excess = calculate_information_ratio(portfolio_returns, benchmark_returns)
+    
+    # Display key metrics
+    st.markdown("---")
+    section_title("🎯 Key Performance Metrics")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="label">Max Drawdown</div>
+            <div class="value" style="color:{COLORS['danger']};">{dd_info['max_drawdown']*100:.2f}%</div>
+            <p style="color:{COLORS['text_secondary']}; font-size:0.8rem; margin-top:0.5rem;">
+                Worst peak-to-trough decline
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="label">Calmar Ratio</div>
+            <div class="value">{calmar:.3f}</div>
+            <p style="color:{COLORS['text_secondary']}; font-size:0.8rem; margin-top:0.5rem;">
+                Return / Max Drawdown
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="label">Information Ratio</div>
+            <div class="value">{info_ratio:.3f}</div>
+            <p style="color:{COLORS['text_secondary']}; font-size:0.8rem; margin-top:0.5rem;">
+                Excess Return / Tracking Error
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="label">Tracking Error</div>
+            <div class="value">{tracking_error*100:.2f}%</div>
+            <p style="color:{COLORS['text_secondary']}; font-size:0.8rem; margin-top:0.5rem;">
+                vs Equal-Weight Benchmark
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Drawdown Analysis
+    st.markdown("---")
+    section_title("📊 Maximum Drawdown Analysis")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Drawdown details
+        duration_days = (dd_info['trough_date'] - dd_info['peak_date']).days if dd_info['trough_date'] and dd_info['peak_date'] else 0
+        
+        recovery_status = "Recovered"
+        recovery_days = 0
+        if dd_info['recovery_date']:
+            recovery_days = (dd_info['recovery_date'] - dd_info['trough_date']).days
+        else:
+            recovery_status = "Not Yet Recovered"
+        
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>Drawdown Timeline</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>Peak Date:</strong> {dd_info['peak_date'].strftime('%Y-%m-%d') if dd_info['peak_date'] else 'N/A'}<br/>
+            <strong>Trough Date:</strong> {dd_info['trough_date'].strftime('%Y-%m-%d') if dd_info['trough_date'] else 'N/A'}<br/>
+            <strong>Drawdown Duration:</strong> {duration_days} days<br/>
+            <strong>Recovery Status:</strong> {recovery_status}<br/>
+            {f"<strong>Recovery Duration:</strong> {recovery_days} days<br/>" if dd_info['recovery_date'] else ""}
+            <strong>Total Loss:</strong> <span style="color:{COLORS['danger']};">{dd_info['max_drawdown']*100:.2f}%</span>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        # Metric interpretations
+        calmar_interpretation = "Excellent" if calmar > 1.0 else "Good" if calmar > 0.5 else "Fair" if calmar > 0 else "Poor"
+        info_interpretation = "Excellent" if info_ratio > 0.75 else "Good" if info_ratio > 0.5 else "Fair" if info_ratio > 0 else "Poor"
+        
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>Performance Assessment</h4>
+            <p style='margin-top:0.5rem;'>
+            <strong>Calmar Ratio ({calmar:.3f}):</strong> {calmar_interpretation}<br/>
+            <span style="font-size:0.85rem;">Measures return per unit of downside risk (drawdown)</span>
+            </p>
+            <p style='margin-top:0.5rem;'>
+            <strong>Information Ratio ({info_ratio:.3f}):</strong> {info_interpretation}<br/>
+            <span style="font-size:0.85rem;">Measures excess return per unit of tracking error</span>
+            </p>
+            <p style='margin-top:0.5rem;'>
+            <strong>Annual Excess Return:</strong> {annual_excess*100:.2f}%<br/>
+            <span style="font-size:0.85rem;">vs Equal-Weight Benchmark</span>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Drawdown Chart
+    st.markdown("---")
+    section_title("📈 Historical Drawdown Profile")
+    
+    fig, axes = plt.subplots(2, 1, figsize=(12, 7))
+    
+    # Cumulative returns with drawdown periods
+    ax1 = axes[0]
+    cumulative = (1 + portfolio_returns).cumprod()
+    ax1.plot(cumulative.index, cumulative, color=COLORS['accent_gold'], linewidth=2, label='Portfolio Value')
+    ax1.plot(cumulative.index, cumulative.cummax(), color=COLORS['success'], 
+             linestyle='--', linewidth=1.5, alpha=0.7, label='Previous Peak')
+    
+    # Highlight max drawdown period
+    if dd_info['peak_date'] and dd_info['trough_date']:
+        ax1.axvspan(dd_info['peak_date'], dd_info['trough_date'], 
+                   alpha=0.2, color=COLORS['danger'], label='Max Drawdown Period')
+    
+    ax1.set_ylabel('Cumulative Value', color='white', fontsize=11, weight='bold')
+    ax1.set_title('Portfolio Growth with Drawdown Periods', color='white', fontsize=12, weight='bold')
+    ax1.legend(loc='best', facecolor='#1a2332', edgecolor=COLORS['accent_gold'], labelcolor='white')
+    ax1.tick_params(colors='white')
+    for label in ax1.get_xticklabels() + ax1.get_yticklabels():
+        label.set_color('white')
+    ax1.grid(True, alpha=0.3, color='white', linestyle='--')
+    ax1.set_facecolor('#0f1824')
+    for spine in ax1.spines.values():
+        spine.set_edgecolor('white')
+    
+    # Drawdown series
+    ax2 = axes[1]
+    ax2.fill_between(dd_info['drawdown_series'].index, dd_info['drawdown_series']*100, 0, 
+                     color=COLORS['danger'], alpha=0.3)
+    ax2.plot(dd_info['drawdown_series'].index, dd_info['drawdown_series']*100, 
+            color=COLORS['danger'], linewidth=1.5)
+    ax2.axhline(dd_info['max_drawdown']*100, color='darkred', linestyle='--', 
+               linewidth=2, label=f'Max DD: {dd_info["max_drawdown"]*100:.2f}%')
+    
+    ax2.set_xlabel('Date', color='white', fontsize=11, weight='bold')
+    ax2.set_ylabel('Drawdown (%)', color='white', fontsize=11, weight='bold')
+    ax2.set_title('Underwater Equity Curve', color='white', fontsize=12, weight='bold')
+    ax2.legend(loc='lower right', facecolor='#1a2332', edgecolor=COLORS['accent_gold'], labelcolor='white')
+    ax2.tick_params(colors='white')
+    for label in ax2.get_xticklabels() + ax2.get_yticklabels():
+        label.set_color('white')
+    ax2.grid(True, alpha=0.3, color='white', linestyle='--')
+    ax2.set_facecolor('#0f1824')
+    for spine in ax2.spines.values():
+        spine.set_edgecolor('white')
+    
+    fig.patch.set_facecolor('#0f1824')
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close()
+    
+    # Comparison table
+    st.markdown("---")
+    section_title("📊 Performance Metrics Comparison")
+    
+    comparison_data = {
+        'Metric': [
+            'Sharpe Ratio',
+            'Calmar Ratio',
+            'Information Ratio',
+            'Max Drawdown',
+            'Tracking Error',
+            'Annual Volatility'
+        ],
+        'Value': [
+            f"{metrics['sharpe_ratio']:.3f}",
+            f"{calmar:.3f}",
+            f"{info_ratio:.3f}",
+            f"{dd_info['max_drawdown']*100:.2f}%",
+            f"{tracking_error*100:.2f}%",
+            f"{metrics['volatility']*100:.2f}%"
+        ],
+        'Interpretation': [
+            'Risk-adjusted return',
+            'Return per unit of max drawdown',
+            'Excess return per unit of tracking error',
+            'Worst peak-to-trough decline',
+            'Deviation from benchmark',
+            'Overall portfolio volatility'
+        ],
+        'Good Range': [
+            '> 1.0',
+            '> 0.5',
+            '> 0.5',
+            '< -20%',
+            '< 5%',
+            '10-20%'
+        ]
+    }
+    
+    comparison_df = pd.DataFrame(comparison_data)
+    st.dataframe(comparison_df, use_container_width=True, hide_index=True)
+    
+    # Definitions
+    st.markdown("---")
+    section_title("📚 Metric Definitions")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>Maximum Drawdown</h4>
+            <p style='margin-top:0.5rem;'>
+            The largest peak-to-trough decline in portfolio value. Measures the worst 
+            loss an investor would have experienced during the period.
+            </p>
+            <p style='margin-top:0.5rem; font-family: monospace; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px;'>
+            Max DD = (Trough Value - Peak Value) / Peak Value
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>Information Ratio</h4>
+            <p style='margin-top:0.5rem;'>
+            Measures portfolio manager skill in generating excess returns relative to a 
+            benchmark, adjusted for tracking error.
+            </p>
+            <p style='margin-top:0.5rem; font-family: monospace; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px;'>
+            IR = Excess Return / Tracking Error
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>Calmar Ratio</h4>
+            <p style='margin-top:0.5rem;'>
+            Return-to-risk ratio using maximum drawdown as the risk measure. Higher values 
+            indicate better risk-adjusted returns relative to worst losses.
+            </p>
+            <p style='margin-top:0.5rem; font-family: monospace; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px;'>
+            Calmar = Annual Return / |Max Drawdown|
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(f"""
+        <div class="info-box">
+            <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>Tracking Error</h4>
+            <p style='margin-top:0.5rem;'>
+            Standard deviation of the difference between portfolio returns and benchmark returns. 
+            Measures how closely the portfolio follows its benchmark.
+            </p>
+            <p style='margin-top:0.5rem; font-family: monospace; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px;'>
+            TE = StdDev(Portfolio Return - Benchmark Return)
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+# ========== TAB 7: ASSET DETAILS ==========
+with tab7:
     section_title("📚 Portfolio Holdings Details")
     
     # Summary info with better visibility
