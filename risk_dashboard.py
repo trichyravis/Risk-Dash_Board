@@ -696,7 +696,14 @@ if portfolio_mode == "Preset Portfolio":
         # Check if weights sum to 100%
         total_weight = sum(new_weights.values())
         if abs(total_weight - 1.0) > 0.01:
-            st.sidebar.warning(f"⚠️ Weights sum to {total_weight*100:.1f}%. Must equal 100%!")
+            st.sidebar.markdown(f"""
+            <div style="background: rgba(255, 193, 7, 0.15); border-left: 4px solid #ffc107; 
+                        padding: 0.75rem; border-radius: 4px; margin: 0.5rem 0;">
+                <p style="color: #ffd43b; margin: 0; font-weight: 600; font-size: 0.9rem;">
+                    ⚠️ Weights sum to {total_weight*100:.1f}%. Must equal 100%!
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
             # Auto-normalize
             if st.sidebar.button("Auto-Normalize Weights"):
                 new_weights = {k: v/total_weight for k, v in new_weights.items()}
@@ -756,7 +763,14 @@ else:
         # Validate weights
         total_weight = sum(portfolio_dict.values())
         if abs(total_weight - 1.0) > 0.01:
-            st.sidebar.warning(f"⚠️ Weights sum to {total_weight*100:.1f}%. Must equal 100%!")
+            st.sidebar.markdown(f"""
+            <div style="background: rgba(255, 193, 7, 0.15); border-left: 4px solid #ffc107; 
+                        padding: 0.75rem; border-radius: 4px; margin: 0.5rem 0;">
+                <p style="color: #ffd43b; margin: 0; font-weight: 600; font-size: 0.9rem;">
+                    ⚠️ Weights sum to {total_weight*100:.1f}%. Must equal 100%!
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
             if st.sidebar.button("Auto-Normalize"):
                 portfolio_dict = {k: v/total_weight for k, v in portfolio_dict.items()}
                 st.sidebar.success("✅ Normalized!")
@@ -764,7 +778,14 @@ else:
             st.sidebar.success(f"✅ Weights sum to {total_weight*100:.0f}%")
             
     else:  # Market Cap Weighted
-        st.sidebar.info("💡 Market cap weights are approximated for demo purposes")
+        st.sidebar.markdown(f"""
+        <div style="background: rgba(0, 123, 255, 0.15); border-left: 4px solid #007bff; 
+                    padding: 0.75rem; border-radius: 4px; margin: 0.5rem 0;">
+            <p style="color: #4dabf7; margin: 0; font-weight: 600; font-size: 0.9rem;">
+                💡 Market cap weights are approximated for demo purposes
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
         # Simplified market cap weights (you can enhance this with real market cap data)
         market_cap_weights = {
             # Indian stocks - approximate market cap weights
