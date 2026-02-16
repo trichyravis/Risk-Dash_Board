@@ -1238,7 +1238,7 @@ with tab5:
                         cmap='viridis', marker='o', s=10, alpha=0.3, label='Random Portfolios')
     
     # Plot optimal portfolios
-    ax.scatter(max_sharpe_std, max_sharpe_return, marker='★', color=COLORS['accent_gold'], 
+    ax.scatter(max_sharpe_std, max_sharpe_return, marker='*', color=COLORS['accent_gold'], 
               s=500, edgecolors='black', linewidth=2, label='Max Sharpe Ratio', zorder=5)
     ax.scatter(min_var_std, min_var_return, marker='D', color=COLORS['success'], 
               s=300, edgecolors='black', linewidth=2, label='Min Variance', zorder=5)
