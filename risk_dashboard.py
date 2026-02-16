@@ -992,9 +992,32 @@ with tab2:
         colors_list = [COLORS['dark_blue'], COLORS['medium_blue'], COLORS['light_blue'], 
                       COLORS['accent_gold'], COLORS['text_secondary']]
         colors_extended = colors_list * (len(valid_tickers) // len(colors_list) + 1)
-        ax.pie(weights, labels=labels, autopct='%1.1f%%', startangle=90,
-               colors=colors_extended[:len(valid_tickers)])
-        ax.set_title('Portfolio Allocation')
+        
+        wedges, texts, autotexts = ax.pie(
+            weights, 
+            labels=labels, 
+            autopct='%1.1f%%', 
+            startangle=90,
+            colors=colors_extended[:len(valid_tickers)],
+            textprops={'color': 'white', 'weight': 'bold', 'fontsize': 9}
+        )
+        
+        # Make percentage text more visible
+        for autotext in autotexts:
+            autotext.set_color('white')
+            autotext.set_weight('bold')
+            autotext.set_fontsize(10)
+        
+        # Make labels more visible
+        for text in texts:
+            text.set_color('white')
+            text.set_weight('bold')
+            text.set_fontsize(9)
+        
+        ax.set_title('Portfolio Allocation', color='white', fontsize=12, weight='bold', pad=15)
+        ax.set_facecolor('#0f1824')
+        fig.patch.set_facecolor('#0f1824')
+        
         plt.tight_layout()
         st.pyplot(fig)
         plt.close()
@@ -1012,16 +1035,51 @@ with tab2:
             elif ticker in INDICES:
                 asset_types['Indices'] += weights[i]
         
+        # Remove zero values
         asset_types = {k: v for k, v in asset_types.items() if v > 0}
         
-        fig, ax = plt.subplots(figsize=(6, 6))
-        ax.pie(asset_types.values(), labels=asset_types.keys(), autopct='%1.1f%%', 
-               startangle=90, colors=[COLORS['accent_gold'], COLORS['medium_blue'], 
-                                     COLORS['light_blue'], COLORS['dark_blue']])
-        ax.set_title('Asset Class Distribution')
-        plt.tight_layout()
-        st.pyplot(fig)
-        plt.close()
+        if asset_types:
+            fig, ax = plt.subplots(figsize=(6, 6))
+            
+            # Create color mapping
+            type_colors = {
+                'Indian Stocks': COLORS['accent_gold'],
+                'US Stocks': COLORS['medium_blue'],
+                'Commodities': COLORS['light_blue'],
+                'Indices': COLORS['dark_blue']
+            }
+            colors_for_chart = [type_colors.get(k, COLORS['text_secondary']) for k in asset_types.keys()]
+            
+            wedges, texts, autotexts = ax.pie(
+                asset_types.values(), 
+                labels=asset_types.keys(), 
+                autopct='%1.1f%%', 
+                startangle=90,
+                colors=colors_for_chart,
+                textprops={'color': 'white', 'weight': 'bold', 'fontsize': 10}
+            )
+            
+            # Make percentage text more visible
+            for autotext in autotexts:
+                autotext.set_color('white')
+                autotext.set_weight('bold')
+                autotext.set_fontsize(11)
+            
+            # Make labels more visible
+            for text in texts:
+                text.set_color('white')
+                text.set_weight('bold')
+                text.set_fontsize(10)
+            
+            ax.set_title('Asset Class Distribution', color='white', fontsize=12, weight='bold', pad=15)
+            ax.set_facecolor('#0f1824')
+            fig.patch.set_facecolor('#0f1824')
+            
+            plt.tight_layout()
+            st.pyplot(fig)
+            plt.close()
+        else:
+            st.info("Asset class distribution not available for current selection")
 
 # ========== TAB 3: STRESS TESTING ==========
 with tab3:
@@ -1313,30 +1371,48 @@ with tab5:
     ax1 = axes[0]
     asset_labels = [get_asset_name(t)[:15] + '...' if len(get_asset_name(t)) > 15 else get_asset_name(t) 
                    for t in valid_tickers]
-    ax1.barh(asset_labels, weights*100, color=COLORS['medium_blue'])
-    ax1.set_xlabel('Weight (%)', color=COLORS['text_secondary'])
-    ax1.set_title('Current Portfolio', color=COLORS['text_primary'])
-    ax1.tick_params(colors=COLORS['text_secondary'])
-    ax1.grid(True, alpha=0.3, axis='x')
+    ax1.barh(asset_labels, weights*100, color=COLORS['medium_blue'], edgecolor='white', linewidth=0.5)
+    ax1.set_xlabel('Weight (%)', color='white', fontsize=11, weight='bold')
+    ax1.set_title('Current Portfolio', color='white', fontsize=12, weight='bold', pad=10)
+    ax1.tick_params(colors='white', labelsize=10)
+    for label in ax1.get_xticklabels() + ax1.get_yticklabels():
+        label.set_color('white')
+        label.set_fontweight('bold')
+    ax1.grid(True, alpha=0.3, axis='x', color='white', linestyle='--')
     ax1.set_facecolor('#0f1824')
+    for spine in ax1.spines.values():
+        spine.set_edgecolor('white')
+        spine.set_linewidth(1.2)
     
     # Max Sharpe
     ax2 = axes[1]
-    ax2.barh(asset_labels, max_sharpe_weights*100, color=COLORS['accent_gold'])
-    ax2.set_xlabel('Weight (%)', color=COLORS['text_secondary'])
-    ax2.set_title('Max Sharpe Ratio ⭐', color=COLORS['accent_gold'])
-    ax2.tick_params(colors=COLORS['text_secondary'])
-    ax2.grid(True, alpha=0.3, axis='x')
+    ax2.barh(asset_labels, max_sharpe_weights*100, color=COLORS['accent_gold'], edgecolor='white', linewidth=0.5)
+    ax2.set_xlabel('Weight (%)', color='white', fontsize=11, weight='bold')
+    ax2.set_title('Max Sharpe Ratio ⭐', color=COLORS['accent_gold'], fontsize=12, weight='bold', pad=10)
+    ax2.tick_params(colors='white', labelsize=10)
+    for label in ax2.get_xticklabels() + ax2.get_yticklabels():
+        label.set_color('white')
+        label.set_fontweight('bold')
+    ax2.grid(True, alpha=0.3, axis='x', color='white', linestyle='--')
     ax2.set_facecolor('#0f1824')
+    for spine in ax2.spines.values():
+        spine.set_edgecolor('white')
+        spine.set_linewidth(1.2)
     
     # Min Variance
     ax3 = axes[2]
-    ax3.barh(asset_labels, min_var_weights*100, color=COLORS['success'])
-    ax3.set_xlabel('Weight (%)', color=COLORS['text_secondary'])
-    ax3.set_title('Minimum Variance', color=COLORS['success'])
-    ax3.tick_params(colors=COLORS['text_secondary'])
-    ax3.grid(True, alpha=0.3, axis='x')
+    ax3.barh(asset_labels, min_var_weights*100, color=COLORS['success'], edgecolor='white', linewidth=0.5)
+    ax3.set_xlabel('Weight (%)', color='white', fontsize=11, weight='bold')
+    ax3.set_title('Minimum Variance', color=COLORS['success'], fontsize=12, weight='bold', pad=10)
+    ax3.tick_params(colors='white', labelsize=10)
+    for label in ax3.get_xticklabels() + ax3.get_yticklabels():
+        label.set_color('white')
+        label.set_fontweight('bold')
+    ax3.grid(True, alpha=0.3, axis='x', color='white', linestyle='--')
     ax3.set_facecolor('#0f1824')
+    for spine in ax3.spines.values():
+        spine.set_edgecolor('white')
+        spine.set_linewidth(1.2)
     
     fig.patch.set_facecolor('#0f1824')
     plt.tight_layout()
