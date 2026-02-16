@@ -882,7 +882,11 @@ es_amount = abs(es_pct) * portfolio_value
 
 # Display current portfolio allocation
 with st.expander("📊 Current Portfolio Allocation", expanded=False):
-    st.markdown("### Portfolio Composition")
+    st.markdown(f"""
+    <h3 style="color:{COLORS['accent_gold']}; font-family: 'Playfair Display', serif; margin-bottom: 1rem;">
+        🥧 Portfolio Composition
+    </h3>
+    """, unsafe_allow_html=True)
     
     allocation_data = []
     for ticker in valid_tickers:
@@ -897,12 +901,26 @@ with st.expander("📊 Current Portfolio Allocation", expanded=False):
     allocation_df = pd.DataFrame(allocation_data)
     st.dataframe(allocation_df, use_container_width=True, hide_index=True)
     
-    # Validation
+    # Validation with better styling
     total_weight_pct = sum(weights) * 100
     if abs(total_weight_pct - 100) < 0.1:
-        st.success(f"✅ Portfolio weights sum to {total_weight_pct:.1f}%")
+        st.markdown(f"""
+        <div style="background: rgba(40, 167, 69, 0.2); border: 1px solid {COLORS['success']}; 
+                    border-radius: 8px; padding: 0.8rem; margin-top: 1rem;">
+            <p style="color:{COLORS['success']}; margin:0; font-weight: 600;">
+                ✅ Portfolio weights sum to {total_weight_pct:.1f}%
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     else:
-        st.warning(f"⚠️ Portfolio weights sum to {total_weight_pct:.1f}%")
+        st.markdown(f"""
+        <div style="background: rgba(220, 53, 69, 0.2); border: 1px solid {COLORS['danger']}; 
+                    border-radius: 8px; padding: 0.8rem; margin-top: 1rem;">
+            <p style="color:{COLORS['danger']}; margin:0; font-weight: 600;">
+                ⚠️ Portfolio weights sum to {total_weight_pct:.1f}%
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ============================================================================
 # MAIN DASHBOARD - TABS (2 rows with clear labels)
