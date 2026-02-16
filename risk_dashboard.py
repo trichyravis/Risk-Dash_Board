@@ -828,19 +828,58 @@ with st.expander("📊 Current Portfolio Allocation", expanded=False):
         st.warning(f"⚠️ Portfolio weights sum to {total_weight_pct:.1f}%")
 
 # ============================================================================
-# MAIN DASHBOARD - TABS (Split into 2 rows)
+# MAIN DASHBOARD - TABS (2 rows with clear labels)
 # ============================================================================
-st.markdown(f'<div class="section-title">📊 Risk Analytics Dashboard</div>', unsafe_allow_html=True)
 
-# First row of tabs
-tab1, tab2, tab3 = st.tabs([
+# Row 1: Core Analysis
+st.markdown(f"""
+<div style="background: linear-gradient(90deg, {COLORS['dark_blue']}, {COLORS['medium_blue']}); 
+            border-left: 4px solid {COLORS['accent_gold']}; padding: 0.8rem 1.5rem; 
+            margin: 1.5rem 0 0.5rem 0; border-radius: 8px;">
+    <h3 style="color:{COLORS['accent_gold']}; margin:0; font-family: 'Playfair Display', serif;">
+        📊 Core Risk Analysis
+    </h3>
+    <p style="color:{COLORS['text_secondary']}; margin:0.3rem 0 0; font-size:0.85rem;">
+        Essential portfolio risk metrics and performance analytics
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+tab1, tab2 = st.tabs([
     "🎯 Risk Overview",
-    "📊 Portfolio Analytics",
-    "🔥 Stress Testing"
+    "📊 Portfolio Analytics"
 ])
 
-# Second row of tabs
-tab4, tab5, tab6 = st.tabs([
+# Visual separator and arrow indicator
+st.markdown(f"""
+<div style="text-align: center; margin: 1.5rem 0 0.8rem 0;">
+    <div style="display: inline-block; background: {COLORS['card_bg']}; 
+                border: 2px solid {COLORS['accent_gold']}; border-radius: 50%; 
+                width: 50px; height: 50px; line-height: 46px; font-size: 24px;">
+        ⬇️
+    </div>
+    <p style="color:{COLORS['accent_gold']}; margin-top: 0.5rem; font-weight: 600;">
+        More Analytics Below
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# Row 2: Advanced Analytics
+st.markdown(f"""
+<div style="background: linear-gradient(90deg, {COLORS['medium_blue']}, {COLORS['dark_blue']}); 
+            border-left: 4px solid {COLORS['accent_gold']}; padding: 0.8rem 1.5rem; 
+            margin: 1rem 0 0.5rem 0; border-radius: 8px;">
+    <h3 style="color:{COLORS['accent_gold']}; margin:0; font-family: 'Playfair Display', serif;">
+        🔬 Advanced Analytics & Optimization
+    </h3>
+    <p style="color:{COLORS['text_secondary']}; margin:0.3rem 0 0; font-size:0.85rem;">
+        Deep dive analysis, stress testing, and portfolio optimization tools
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+tab3, tab4, tab5, tab6 = st.tabs([
+    "🔥 Stress Testing",
     "🔗 Correlation Analysis",
     "📈 Portfolio Optimization",
     "📚 Asset Details"
