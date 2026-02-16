@@ -503,6 +503,73 @@ def calculate_portfolio_metrics(returns_df, weights):
     return portfolio_returns, metrics
 
 
+def portfolio_performance(weights, mean_returns, cov_matrix, risk_free_rate=0.05):
+    """Calculate portfolio performance metrics"""
+    returns = np.sum(mean_returns * weights) * 252
+    std = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights))) * np.sqrt(252)
+    sharpe = (returns - risk_free_rate) / std
+    return returns, std, sharpe
+
+
+def negative_sharpe(weights, mean_returns, cov_matrix, risk_free_rate=0.05):
+    """Negative Sharpe ratio for minimization"""
+    return -portfolio_performance(weights, mean_returns, cov_matrix, risk_free_rate)[2]
+
+
+def max_sharpe_ratio(mean_returns, cov_matrix, risk_free_rate=0.05):
+    """Optimize for maximum Sharpe ratio"""
+    from scipy.optimize import minimize
+    
+    num_assets = len(mean_returns)
+    args = (mean_returns, cov_matrix, risk_free_rate)
+    constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+    bounds = tuple((0, 1) for _ in range(num_assets))
+    initial_guess = num_assets * [1. / num_assets]
+    
+    result = minimize(negative_sharpe, initial_guess, method='SLSQP',
+                     bounds=bounds, constraints=constraints, args=args)
+    
+    return result
+
+
+def min_variance(mean_returns, cov_matrix):
+    """Optimize for minimum variance"""
+    from scipy.optimize import minimize
+    
+    num_assets = len(mean_returns)
+    args = (mean_returns, cov_matrix)
+    constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+    bounds = tuple((0, 1) for _ in range(num_assets))
+    initial_guess = num_assets * [1. / num_assets]
+    
+    def portfolio_variance(weights, mean_returns, cov_matrix):
+        return np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights))) * np.sqrt(252)
+    
+    result = minimize(portfolio_variance, initial_guess, method='SLSQP',
+                     bounds=bounds, constraints=constraints, args=args)
+    
+    return result
+
+
+def efficient_frontier(mean_returns, cov_matrix, risk_free_rate=0.05, num_portfolios=100):
+    """Generate efficient frontier"""
+    results = np.zeros((3, num_portfolios))
+    
+    for i in range(num_portfolios):
+        weights = np.random.random(len(mean_returns))
+        weights /= np.sum(weights)
+        
+        portfolio_return, portfolio_std, portfolio_sharpe = portfolio_performance(
+            weights, mean_returns, cov_matrix, risk_free_rate
+        )
+        
+        results[0, i] = portfolio_std
+        results[1, i] = portfolio_return
+        results[2, i] = portfolio_sharpe
+    
+    return results
+
+
 # ============================================================================
 # PAGE CONFIGURATION
 # ============================================================================
@@ -763,11 +830,12 @@ with st.expander("📊 Current Portfolio Allocation", expanded=False):
 # ============================================================================
 # MAIN DASHBOARD - TABS
 # ============================================================================
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "🎯 Risk Overview",
     "📊 Portfolio Analytics",
     "🔥 Stress Testing",
     "🔗 Correlation Analysis",
+    "📈 Portfolio Optimization",
     "📚 Asset Details"
 ])
 
@@ -1055,8 +1123,269 @@ with tab4:
     with col3:
         metric_card("Min Correlation", f"{np.min(corr_values):.3f}", "Lowest co-movement")
 
-# ========== TAB 5: ASSET DETAILS ==========
+# ========== TAB 5: PORTFOLIO OPTIMIZATION ==========
 with tab5:
+    section_title("📈 Portfolio Optimization - Maximum Sharpe Ratio")
+    
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>Modern Portfolio Theory</h4>
+        <p style='margin-top:0.5rem;'>
+        <strong>Objective:</strong> Find the optimal portfolio allocation that maximizes risk-adjusted returns (Sharpe Ratio).<br/>
+        The efficient frontier shows all optimal portfolios offering the highest expected return for each level of risk.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Risk-free rate input
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        risk_free_rate = st.number_input(
+            "Risk-Free Rate (%)",
+            min_value=0.0,
+            max_value=20.0,
+            value=5.0,
+            step=0.1,
+            help="Typically 10-year government bond yield (e.g., India 10Y ~7%, US 10Y ~4%)"
+        ) / 100
+    
+    with col2:
+        st.markdown(f"""
+        <div class="info-box" style="margin-top:0;">
+            <p style="margin:0;"><strong>Common Risk-Free Rates:</strong></p>
+            <p style="margin:0.3rem 0;">• India 10Y G-Sec: ~7.0%  |  US 10Y Treasury: ~4.0%  |  Conservative: 5.0%</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Calculate mean returns and covariance matrix
+    mean_returns = returns_df.mean()
+    cov_matrix = returns_df.cov()
+    
+    # Optimize portfolios
+    with st.spinner('Optimizing portfolios...'):
+        # Max Sharpe Ratio
+        max_sharpe = max_sharpe_ratio(mean_returns, cov_matrix, risk_free_rate)
+        max_sharpe_weights = max_sharpe['x']
+        max_sharpe_return, max_sharpe_std, max_sharpe_ratio = portfolio_performance(
+            max_sharpe_weights, mean_returns, cov_matrix, risk_free_rate
+        )
+        
+        # Min Variance
+        min_var = min_variance(mean_returns, cov_matrix)
+        min_var_weights = min_var['x']
+        min_var_return, min_var_std, min_var_ratio = portfolio_performance(
+            min_var_weights, mean_returns, cov_matrix, risk_free_rate
+        )
+        
+        # Current portfolio
+        current_return, current_std, current_sharpe = portfolio_performance(
+            weights, mean_returns, cov_matrix, risk_free_rate
+        )
+        
+        # Efficient frontier
+        ef_results = efficient_frontier(mean_returns, cov_matrix, risk_free_rate, num_portfolios=2000)
+    
+    # Display optimal portfolios
+    st.markdown("---")
+    section_title("🎯 Optimal Portfolio Allocations")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="label">Current Portfolio</div>
+            <div class="value">{current_sharpe:.3f}</div>
+            <p style="color:{COLORS['text_secondary']}; font-size:0.8rem; margin-top:0.5rem;">
+                Return: {current_return*100:.2f}%<br/>
+                Risk: {current_std*100:.2f}%
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="metric-card" style="border-color:{COLORS['success']};">
+            <div class="label">Max Sharpe Ratio ⭐</div>
+            <div class="value">{max_sharpe_ratio:.3f}</div>
+            <p style="color:{COLORS['text_secondary']}; font-size:0.8rem; margin-top:0.5rem;">
+                Return: {max_sharpe_return*100:.2f}%<br/>
+                Risk: {max_sharpe_std*100:.2f}%
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="label">Minimum Variance</div>
+            <div class="value">{min_var_ratio:.3f}</div>
+            <p style="color:{COLORS['text_secondary']}; font-size:0.8rem; margin-top:0.5rem;">
+                Return: {min_var_return*100:.2f}%<br/>
+                Risk: {min_var_std*100:.2f}%
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Efficient Frontier Chart
+    st.markdown("---")
+    section_title("📊 Efficient Frontier")
+    
+    fig, ax = plt.subplots(figsize=(12, 7))
+    
+    # Plot efficient frontier (random portfolios)
+    scatter = ax.scatter(ef_results[0, :], ef_results[1, :], c=ef_results[2, :], 
+                        cmap='viridis', marker='o', s=10, alpha=0.3, label='Random Portfolios')
+    
+    # Plot optimal portfolios
+    ax.scatter(max_sharpe_std, max_sharpe_return, marker='★', color=COLORS['accent_gold'], 
+              s=500, edgecolors='black', linewidth=2, label='Max Sharpe Ratio', zorder=5)
+    ax.scatter(min_var_std, min_var_return, marker='D', color=COLORS['success'], 
+              s=300, edgecolors='black', linewidth=2, label='Min Variance', zorder=5)
+    ax.scatter(current_std, current_return, marker='o', color=COLORS['danger'], 
+              s=300, edgecolors='black', linewidth=2, label='Current Portfolio', zorder=5)
+    
+    # Colorbar
+    cbar = plt.colorbar(scatter, ax=ax)
+    cbar.set_label('Sharpe Ratio', rotation=270, labelpad=20, color=COLORS['text_primary'])
+    cbar.ax.tick_params(colors=COLORS['text_secondary'])
+    
+    # Styling
+    ax.set_xlabel('Annualized Volatility (%)', fontsize=12, color=COLORS['text_secondary'])
+    ax.set_ylabel('Annualized Return (%)', fontsize=12, color=COLORS['text_secondary'])
+    ax.set_title('Efficient Frontier - Risk vs Return', fontsize=14, color=COLORS['text_primary'], pad=20)
+    ax.tick_params(colors=COLORS['text_secondary'])
+    ax.legend(loc='upper left', fontsize=10, facecolor=COLORS['card_bg'], edgecolor=COLORS['accent_gold'])
+    ax.grid(True, alpha=0.3)
+    ax.set_facecolor('#0f1824')
+    fig.patch.set_facecolor('#0f1824')
+    
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close()
+    
+    # Weight Comparison
+    st.markdown("---")
+    section_title("⚖️ Portfolio Weight Comparison")
+    
+    # Create comparison dataframe
+    weight_comparison = pd.DataFrame({
+        'Asset': [get_asset_name(ticker) for ticker in valid_tickers],
+        'Ticker': valid_tickers,
+        'Current (%)': [w*100 for w in weights],
+        'Max Sharpe (%)': [w*100 for w in max_sharpe_weights],
+        'Min Variance (%)': [w*100 for w in min_var_weights],
+        'Difference (%)': [(max_sharpe_weights[i] - weights[i])*100 for i in range(len(weights))],
+    })
+    
+    st.dataframe(weight_comparison.round(2), use_container_width=True, hide_index=True)
+    
+    # Visual weight comparison
+    st.markdown("---")
+    section_title("📊 Weight Allocation Comparison")
+    
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    
+    # Current Portfolio
+    ax1 = axes[0]
+    asset_labels = [get_asset_name(t)[:15] + '...' if len(get_asset_name(t)) > 15 else get_asset_name(t) 
+                   for t in valid_tickers]
+    ax1.barh(asset_labels, weights*100, color=COLORS['medium_blue'])
+    ax1.set_xlabel('Weight (%)', color=COLORS['text_secondary'])
+    ax1.set_title('Current Portfolio', color=COLORS['text_primary'])
+    ax1.tick_params(colors=COLORS['text_secondary'])
+    ax1.grid(True, alpha=0.3, axis='x')
+    ax1.set_facecolor('#0f1824')
+    
+    # Max Sharpe
+    ax2 = axes[1]
+    ax2.barh(asset_labels, max_sharpe_weights*100, color=COLORS['accent_gold'])
+    ax2.set_xlabel('Weight (%)', color=COLORS['text_secondary'])
+    ax2.set_title('Max Sharpe Ratio ⭐', color=COLORS['accent_gold'])
+    ax2.tick_params(colors=COLORS['text_secondary'])
+    ax2.grid(True, alpha=0.3, axis='x')
+    ax2.set_facecolor('#0f1824')
+    
+    # Min Variance
+    ax3 = axes[2]
+    ax3.barh(asset_labels, min_var_weights*100, color=COLORS['success'])
+    ax3.set_xlabel('Weight (%)', color=COLORS['text_secondary'])
+    ax3.set_title('Minimum Variance', color=COLORS['success'])
+    ax3.tick_params(colors=COLORS['text_secondary'])
+    ax3.grid(True, alpha=0.3, axis='x')
+    ax3.set_facecolor('#0f1824')
+    
+    fig.patch.set_facecolor('#0f1824')
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close()
+    
+    # Recommendations
+    st.markdown("---")
+    section_title("💡 Optimization Insights")
+    
+    # Calculate which assets to increase/decrease
+    weight_changes = [(max_sharpe_weights[i] - weights[i], valid_tickers[i]) for i in range(len(weights))]
+    weight_changes.sort(reverse=True)
+    
+    increase = [item for item in weight_changes if item[0] > 0.01]
+    decrease = [item for item in weight_changes if item[0] < -0.01]
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if increase:
+            increase_text = "<br/>".join([f"• {get_asset_name(ticker)}: +{change*100:.1f}%" 
+                                         for change, ticker in increase[:5]])
+            st.markdown(f"""
+            <div class="info-box" style="border-color:{COLORS['success']};">
+                <h4 style='color:{COLORS['success']}; margin-top:0;'>✅ Increase Allocation</h4>
+                <p style='margin-top:0.5rem;'>{increase_text}</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="info-box">
+                <p>No significant increases recommended</p>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with col2:
+        if decrease:
+            decrease_text = "<br/>".join([f"• {get_asset_name(ticker)}: {change*100:.1f}%" 
+                                         for change, ticker in decrease[:5]])
+            st.markdown(f"""
+            <div class="info-box" style="border-color:{COLORS['danger']};">
+                <h4 style='color:{COLORS['danger']}; margin-top:0;'>⬇️ Decrease Allocation</h4>
+                <p style='margin-top:0.5rem;'>{decrease_text}</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="info-box">
+                <p>No significant decreases recommended</p>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Performance improvement
+    sharpe_improvement = ((max_sharpe_ratio - current_sharpe) / abs(current_sharpe)) * 100 if current_sharpe != 0 else 0
+    
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>📊 Expected Performance Improvement</h4>
+        <p style='margin-top:0.5rem;'>
+        By switching to the Max Sharpe Ratio portfolio:<br/>
+        • <strong>Sharpe Ratio:</strong> {current_sharpe:.3f} → {max_sharpe_ratio:.3f} 
+          ({'+' if sharpe_improvement > 0 else ''}{sharpe_improvement:.1f}% improvement)<br/>
+        • <strong>Expected Return:</strong> {current_return*100:.2f}% → {max_sharpe_return*100:.2f}%<br/>
+        • <strong>Portfolio Risk:</strong> {current_std*100:.2f}% → {max_sharpe_std*100:.2f}%
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ========== TAB 6: ASSET DETAILS ==========
+with tab6:
     section_title("📚 Portfolio Holdings Details")
     
     # Summary info with better visibility
