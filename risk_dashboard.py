@@ -928,7 +928,7 @@ with tab3:
         These scenarios simulate extreme market conditions applied to your actual portfolio holdings.
         Impacts are calculated based on real volatilities and correlations.
         </p>
-    """)
+    """, title="Stress Testing Framework")
     
     scenarios = {
         'Market Crash (-20%)': -0.20,
@@ -981,7 +981,7 @@ with tab4:
         These correlations are calculated from actual historical returns over the selected period.
         Understanding correlations helps optimize diversification.
         </p>
-    """)
+    """, title="Correlation Analysis")
     
     correlation_matrix = returns_df.corr()
     
@@ -1016,9 +1016,14 @@ with tab4:
 with tab5:
     section_title("📚 Portfolio Holdings Details")
     
-    st.write(f"**Current Portfolio:** {len(valid_tickers)} assets")
-    st.write(f"**Data Period:** {data_start} to {data_end} ({n_days} trading days)")
-    st.write(f"**Total Portfolio Value:** ₹{portfolio_value:,.0f}")
+    # Summary info with better visibility
+    st.markdown(f"""
+    <div class="info-box">
+        <p><strong>Current Portfolio:</strong> {len(valid_tickers)} assets</p>
+        <p><strong>Data Period:</strong> {data_start} to {data_end} ({n_days} trading days)</p>
+        <p><strong>Total Portfolio Value:</strong> ₹{portfolio_value:,.0f}</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -1028,28 +1033,64 @@ with tab5:
         asset_value = portfolio_value * asset_weight
         asset_returns = returns_df[ticker]
         
-        with st.expander(f"📊 {asset_name} ({ticker}) - {asset_weight*100:.1f}% allocation"):
+        with st.expander(f"📊 {asset_name} ({ticker}) - {asset_weight*100:.1f}% allocation", expanded=False):
+            # Use metric cards for better visibility
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                st.metric("Allocation", f"₹{asset_value:,.0f}")
-                st.metric("Weight", f"{asset_weight*100:.1f}%")
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="label">Allocation</div>
+                    <div class="value">₹{asset_value:,.0f}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="label">Weight</div>
+                    <div class="value">{asset_weight*100:.1f}%</div>
+                </div>
+                """, unsafe_allow_html=True)
             
             with col2:
-                st.metric("Ann. Return", f"{asset_returns.mean()*252*100:.2f}%")
-                st.metric("Ann. Volatility", f"{asset_returns.std()*np.sqrt(252)*100:.2f}%")
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="label">Annual Return</div>
+                    <div class="value">{asset_returns.mean()*252*100:.2f}%</div>
+                </div>
+                """, unsafe_allow_html=True)
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="label">Annual Volatility</div>
+                    <div class="value">{asset_returns.std()*np.sqrt(252)*100:.2f}%</div>
+                </div>
+                """, unsafe_allow_html=True)
             
             with col3:
-                st.metric("Sharpe Ratio", f"{(asset_returns.mean()*252)/(asset_returns.std()*np.sqrt(252)):.2f}" if asset_returns.std() > 0 else "N/A")
-                st.metric("VaR (95%)", f"{np.percentile(asset_returns, 5)*100:.2f}%")
+                sharpe = (asset_returns.mean()*252)/(asset_returns.std()*np.sqrt(252)) if asset_returns.std() > 0 else 0
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="label">Sharpe Ratio</div>
+                    <div class="value">{sharpe:.2f}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="label">VaR (95%)</div>
+                    <div class="value">{np.percentile(asset_returns, 5)*100:.2f}%</div>
+                </div>
+                """, unsafe_allow_html=True)
             
             # Mini chart
+            st.markdown(f"<p style='color:{COLORS['text_primary']}; margin-top:1rem; font-weight:600;'>Price History</p>", unsafe_allow_html=True)
             fig, ax = plt.subplots(figsize=(10, 3))
             ax.plot(prices_df.index, prices_df[ticker], color=COLORS['accent_gold'], linewidth=1.5)
-            ax.set_title(f'{asset_name} Price History')
-            ax.set_xlabel('Date')
-            ax.set_ylabel('Price')
+            ax.set_title(f'{asset_name} Price History', color=COLORS['text_primary'])
+            ax.set_xlabel('Date', color=COLORS['text_secondary'])
+            ax.set_ylabel('Price', color=COLORS['text_secondary'])
+            ax.tick_params(colors=COLORS['text_secondary'])
             ax.grid(True, alpha=0.3)
+            ax.set_facecolor('#0f1824')
+            fig.patch.set_facecolor('#0f1824')
             plt.tight_layout()
             st.pyplot(fig)
             plt.close()
