@@ -550,11 +550,11 @@ def calculate_information_ratio(portfolio_returns, benchmark_returns):
     """Calculate Information Ratio (Tracking Error adjusted excess return)"""
     excess_returns = portfolio_returns - benchmark_returns
     tracking_error = excess_returns.std() * np.sqrt(252)
+    annual_excess = excess_returns.mean() * 252
     
     if tracking_error == 0:
-        return 0
+        return 0, 0, annual_excess
     
-    annual_excess = excess_returns.mean() * 252
     info_ratio = annual_excess / tracking_error
     
     return info_ratio, tracking_error, annual_excess
