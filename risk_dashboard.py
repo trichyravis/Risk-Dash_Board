@@ -257,6 +257,25 @@ def apply_styles():
             color: {COLORS['text_dark']} !important;
         }}
 
+        /* Expander styling for Asset Details */
+        .streamlit-expanderHeader {{
+            background: {COLORS['card_bg']} !important;
+            border: 1px solid rgba(255,215,0,0.3) !important;
+            border-radius: 8px !important;
+            color: {COLORS['text_primary']} !important;
+        }}
+        
+        .streamlit-expanderHeader p {{
+            color: {COLORS['text_primary']} !important;
+            font-weight: 600 !important;
+        }}
+        
+        .streamlit-expanderContent {{
+            background: rgba(17, 34, 64, 0.5) !important;
+            border: 1px solid rgba(255,215,0,0.2) !important;
+            border-top: none !important;
+        }}
+
         footer {{visibility: hidden;}}
     </style>
     """, unsafe_allow_html=True)
@@ -922,13 +941,16 @@ with tab2:
 with tab3:
     section_title("🔥 Stress Test Scenarios")
     
-    info_box("""
-        <strong>Scenario Analysis on Real Portfolio</strong>
-        <p style="margin-top:0.5rem;">
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>Stress Testing Framework</h4>
+        <p style='margin-top:0.5rem;'>
+        <strong>Scenario Analysis on Real Portfolio</strong><br/>
         These scenarios simulate extreme market conditions applied to your actual portfolio holdings.
         Impacts are calculated based on real volatilities and correlations.
         </p>
-    """, title="Stress Testing Framework")
+    </div>
+    """, unsafe_allow_html=True)
     
     scenarios = {
         'Market Crash (-20%)': -0.20,
@@ -975,13 +997,16 @@ with tab3:
 with tab4:
     section_title("🔗 Asset Correlation Matrix (Real Data)")
     
-    info_box("""
-        <strong>Historical Correlations from Market Data</strong>
-        <p style="margin-top:0.5rem;">
+    st.markdown(f"""
+    <div class="info-box">
+        <h4 style='color:{COLORS['accent_gold']}; margin-top:0;'>Correlation Analysis</h4>
+        <p style='margin-top:0.5rem;'>
+        <strong>Historical Correlations from Market Data</strong><br/>
         These correlations are calculated from actual historical returns over the selected period.
         Understanding correlations helps optimize diversification.
         </p>
-    """, title="Correlation Analysis")
+    </div>
+    """, unsafe_allow_html=True)
     
     correlation_matrix = returns_df.corr()
     
