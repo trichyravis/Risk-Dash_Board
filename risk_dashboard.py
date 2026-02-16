@@ -262,12 +262,17 @@ def apply_styles():
             background: {COLORS['card_bg']} !important;
             border: 1px solid rgba(255,215,0,0.3) !important;
             border-radius: 8px !important;
-            color: {COLORS['text_primary']} !important;
+            color: {COLORS['accent_gold']} !important;
         }}
         
         .streamlit-expanderHeader p {{
-            color: {COLORS['text_primary']} !important;
+            color: {COLORS['accent_gold']} !important;
             font-weight: 600 !important;
+            font-size: 1rem !important;
+        }}
+        
+        .streamlit-expanderHeader svg {{
+            fill: {COLORS['accent_gold']} !important;
         }}
         
         .streamlit-expanderContent {{
